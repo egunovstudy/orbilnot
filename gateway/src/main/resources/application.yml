@@ -1,0 +1,34 @@
+logging:
+  level:
+    root: debug
+
+spring:
+  application.name: gateway
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedHeaders: "*"
+            allowedMethods: "*"
+      routes:
+        - id: order-service
+          uri: http://order-orbilnot
+          predicates:
+            - Path=/orders/**
+
+        - id: notification-service
+          uri: http://notification-orbilnot
+          predicates:
+            - Path=/notifications/**
+
+        - id: billing
+          uri: http://billing-orbilnot
+          predicates:
+            - Path=/account/**

@@ -1,0 +1,60 @@
+logging:
+  level:
+    org.springframework.security: INFO
+spring:
+  application:
+    name: billing
+  kafka:
+    consumer:
+      group-id: "order-service"
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring:
+          json:
+            type:
+              mapping: paymentEvent:com.gegunov.model.PaymentEvent
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    bootstrap-servers: orbilnot-kafka:9092
+  jpa:
+    database: postgresql
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_SVC}:${POSTGRES_PORT}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+payment:
+  events:
+    topic: payment.event
+order:
+  events:
+    topic: order.event
+
+
+openapi:
+  orbilnot:
+    base-path: /
+server:
+  port: 8000
+  servlet:
+    context-path: /orders
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    distribution:
+      percentiles:
+        "[http.server.requests]": 0.5, 0.95, 0.99
+      percentiles-histogram:
+        "[http.server.requests]": true

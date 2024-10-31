@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="1" author="glebegunov">
+        <sql>
+            create schema order_service;
+            create schema billing;
+            create schema notification_service;
+
+            create table if not exists order_service.orders
+            (
+                id uuid,
+                order_number varchar,
+                account_id uuid,
+                last_name varchar,
+                email varchar,
+                phone varchar,
+                amount integer,
+                order_status varchar,
+                order_date date
+            );
+
+            create table if not exists billing.order_events
+            (
+                id bigserial primary key,
+                order_number varchar,
+                event_type varchar,
+                amount integer,
+                account_id uuid,
+                order_event_state varchar,
+                error_message varchar
+            );
+
+            create table if not exists billing.accounts
+            (
+                id uuid PRIMARY KEY,
+                balance numeric
+            );
+
+            create table if not exists notification_service.notifications
+            (
+                id bigserial primary key,
+                title varchar,
+                body varchar,
+                notification_type varchar,
+                account_id uuid
+            );
+
+        </sql>
+    </changeSet>
+</databaseChangeLog>

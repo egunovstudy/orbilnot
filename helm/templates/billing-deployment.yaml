@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{- include "orbilnot.billing.name" . | nindent 4}}
+  labels:
+    {{- include "orbilnot.labels" . | nindent 4 }}
+    tier: billing
+spec:
+  replicas: {{ .Values.billing.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "orbilnot.labels" . | nindent 6 }}
+      tier: billing
+  template:
+    metadata:
+      labels:
+        {{- include "orbilnot.labels" . | nindent 8 }}
+        tier: billing
+    spec:
+      serviceAccountName:
+        {{- include "orbilnot.serviceAccountName" . | nindent 8}}
+      initContainers:
+        - name: "{{ .Chart.Name}}-init"
+          image: "groundnuty/k8s-wait-for:1.3"
+          imagePullPolicy: {{ .Values.billing.container.pullPolicy }}
+          args:
+            - "job"
+            - "{{ .Values.job.name }}"
+      containers:
+        - name: {{ .Values.billing.name }}
+          image: "{{ .Values.billing.container.repository}}:{{ .Values.billing.container.tag}}"
+          imagePullPolicy: {{ .Values.billing.container.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.postgresql.configmap.name }}
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-creds-secret
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-creds-secret
+                  key: password
+          livenessProbe:
+            {{- toYaml .Values.billing.livenessProbe | nindent 12 }}

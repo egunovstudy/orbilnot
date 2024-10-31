@@ -1,0 +1,505 @@
+{
+	"info": {
+		"_postman_id": "bfa5c9f4-ff55-4239-921b-9278a2968593",
+		"name": "orbilnot",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1776670"
+	},
+	"item": [
+		{
+			"name": "create_new_account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"  pm.expect(pm.response.code).to.equal(200);",
+							"  console.log('New account has been created');",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has the correct Content-Type header\", function () {",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response body is not empty\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData).to.not.be.empty;",
+							"});",
+							"",
+							"",
+							"pm.test(\"Validate the structure of the JSON response\", function () {",
+							"    const responseData = pm.response.json();",
+							"    console.log('Received account ID: ' + responseData);",
+							"    pm.collectionVariables.set('account_id', responseData)",
+							"    pm.expect(responseData).to.be.a('string');",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"actionType\" : \"CREATE_NEW\",\n    \"amount\": 0\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{billing_service_url}}/account/",
+					"host": [
+						"{{billing_service_url}}"
+					],
+					"path": [
+						"account",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "deposit_money_on_account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"  pm.expect(pm.response.code).to.equal(200);",
+							"  console.log('1000 has been put on the account: ' + pm.collectionVariables.get('account_id'));",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"accountId\": \"{{account_id}}\",\n    \"amount\": 1000,\n    \"actionType\": \"DEPOSIT_MONEY\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{billing_service_url}}/account/",
+					"host": [
+						"{{billing_service_url}}"
+					],
+					"path": [
+						"account",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create_order_enough_money",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"  pm.expect(pm.response.code).to.equal(200);",
+							"  console.log('A one order of amount 500 for account' + pm.collectionVariables.get('account_id') + ' has been created');",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has the correct Content-Type header\", function () {",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response body is not empty\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData).to.not.be.empty;",
+							"});",
+							"",
+							"",
+							"pm.test(\"Validate the structure of the JSON response\", function () {",
+							"    const responseData = pm.response.json();",
+							"    console.log('Received order ID: ' + responseData);",
+							"    pm.collectionVariables.set('order1_id', responseData)",
+							"    pm.expect(responseData).to.be.a('string');",
+							"});",
+							"",
+							"",
+							"setTimeout(()=>{}, 2500)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"accountId\": \"{{account_id}}\",\n    \"amount\" : 500\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{order_service_url}}/orders/",
+					"host": [
+						"{{order_service_url}}"
+					],
+					"path": [
+						"orders",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check_account_balance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has the required fields - id and balance\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData).to.have.property('id');",
+							"    pm.expect(responseData).to.have.property('balance');",
+							"});",
+							"",
+							"",
+							"pm.test(\"Id is a non-empty string\", function () {",
+							"  const responseData = pm.response.json();",
+							"  pm.expect(responseData).to.be.an('object');",
+							"  pm.expect(responseData.id).to.be.a('string').and.to.have.length.of.at.least(1, \"Id should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Money withdrawn\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.balance).to.be.a('number');",
+							"    pm.expect(responseData.balance).to.be.equal(500);",
+							"    console.log('Money for order ' + pm.collectionVariables.get('order1_id') + ' have been withdrawn ');",
+							"});",
+							"",
+							"",
+							"pm.test(\"Content-Type header is application/json\", function () {",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{billing_service_url}}/account/{{account_id}}",
+					"host": [
+						"{{billing_service_url}}"
+					],
+					"path": [
+						"account",
+						"{{account_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_notifications_for_account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Content-Type header is application/json\", function () {",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has the required fields - id and title\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('array');",
+							"    responseData.forEach(function(item) {",
+							"        pm.expect(item).to.have.property('id');",
+							"        pm.expect(item).to.have.property('title');",
+							"    });",
+							"});",
+							"",
+							"pm.test(\"Order confirmed\", function () {",
+							"    const responseData = pm.response.json();",
+							"    const expectedTitle = 'Order ' + pm.collectionVariables.get('account_id') + ':' + pm.collectionVariables.get('order1_id') + ' confirmed';",
+							"",
+							"    console.log(responseData[0].title);",
+							"",
+							"    pm.expect(responseData[0].title).to.be.equal(expectedTitle);",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{notification_service_url}}/notifications/{{account_id}}",
+					"host": [
+						"{{notification_service_url}}"
+					],
+					"path": [
+						"notifications",
+						"{{account_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create_order_not_enough_money",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"  pm.expect(pm.response.code).to.equal(200);",
+							"  console.log('Another one order of amount 900 for account' + pm.collectionVariables.get('account_id') + ' has been created');",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has the correct Content-Type header\", function () {",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response body is not empty\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData).to.not.be.empty;",
+							"});",
+							"",
+							"",
+							"pm.test(\"Validate the structure of the JSON response\", function () {",
+							"    const responseData = pm.response.json();",
+							"    console.log('Received order ID: ' + responseData);",
+							"    pm.collectionVariables.set('order2_id', responseData)",
+							"    pm.expect(responseData).to.be.a('string');",
+							"});",
+							"",
+							"",
+							"setTimeout(()=>{}, 2500)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"accountId\": \"{{account_id}}\",\n    \"amount\" : 900\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{order_service_url}}/orders/",
+					"host": [
+						"{{order_service_url}}"
+					],
+					"path": [
+						"orders",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check_account_balance_one_more_time",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has the required fields - id and balance\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData).to.have.property('id');",
+							"    pm.expect(responseData).to.have.property('balance');",
+							"});",
+							"",
+							"",
+							"pm.test(\"Id is a non-empty string\", function () {",
+							"  const responseData = pm.response.json();",
+							"  pm.expect(responseData).to.be.an('object');",
+							"  pm.expect(responseData.id).to.be.a('string').and.to.have.length.of.at.least(1, \"Id should not be empty\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Balance wasn't changed\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.balance).to.be.a('number');",
+							"    pm.expect(responseData.balance).to.be.equal(500);",
+							"    console.log('Money for order ' + pm.collectionVariables.get('order2_id') + ' have NOT been withdrawn ');",
+							"});",
+							"",
+							"",
+							"pm.test(\"Content-Type header is application/json\", function () {",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{billing_service_url}}/account/{{account_id}}",
+					"host": [
+						"{{billing_service_url}}"
+					],
+					"path": [
+						"account",
+						"{{account_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_notifications_for_account_one_more_time",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Content-Type header is application/json\", function () {",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response has the required fields - id and title\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('array');",
+							"    responseData.forEach(function(item) {",
+							"        pm.expect(item).to.have.property('id');",
+							"        pm.expect(item).to.have.property('title');",
+							"        pm.expect(item).to.have.property('body');",
+							"    });",
+							"});",
+							"",
+							"pm.test(\"Order confirmed\", function () {",
+							"    const responseData = pm.response.json();",
+							"    console.log(responseData[1].title);",
+							"    console.log(responseData[1].body);",
+							"    pm.expect(responseData[1].title).to.be.equal('Order ' + pm.collectionVariables.get('account_id') + ':' + pm.collectionVariables.get('order2_id') + ' denied');",
+							"    pm.expect(responseData[1].body).to.be.equal('Not enough balance for commiting payment for order');",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{notification_service_url}}/notifications/{{account_id}}",
+					"host": [
+						"{{notification_service_url}}"
+					],
+					"path": [
+						"notifications",
+						"{{account_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "account_id",
+			"value": ""
+		},
+		{
+			"key": "order_id",
+			"value": ""
+		},
+		{
+			"key": "order1_id",
+			"value": ""
+		}
+	]
+}

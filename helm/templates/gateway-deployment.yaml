@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{- include "orbilnot.gateway.name" . | nindent 4}}
+  labels:
+    {{- include "orbilnot.labels" . | nindent 4 }}
+    tier: gateway
+spec:
+  replicas: {{ .Values.gateway.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "orbilnot.labels" . | nindent 6 }}
+      tier: gateway
+  template:
+    metadata:
+      labels:
+        {{- include "orbilnot.labels" . | nindent 8 }}
+        tier: gateway
+    spec:
+      serviceAccountName:
+        {{- include "orbilnot.serviceAccountName" . | nindent 8}}
+      containers:
+        - name: {{ .Values.gateway.name }}
+          image: "{{ .Values.gateway.container.repository}}:{{ .Values.gateway.container.tag}}"
+          imagePullPolicy: {{ .Values.gateway.container.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.gateway.service.port }}
+              protocol: TCP

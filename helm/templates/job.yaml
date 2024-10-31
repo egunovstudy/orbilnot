@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.job.name }}
+  labels:
+    {{- include "orbilnot.labels" . | nindent 4 }}
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 120
+  template:
+    metadata:
+      labels:
+        {{- include "orbilnot.selectorLabels" . | nindent 8 }}
+    spec:
+      initContainers:
+        - name: check-db-ready
+          image: postgres:9.6.4
+          command: [ 'sh', '-c', 'until pg_isready -h orbilnot-postgresql -p 5432;
+                do echo waiting for database; sleep 5; done;' ]
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.job.image.repository }}:{{ .Values.job.image.tag  }}"
+          imagePullPolicy: {{ .Values.job.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.postgresql.configmap.name }}
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-creds-secret
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-creds-secret
+                  key: password
+      restartPolicy: {{ .Values.job.restartPolicy }}
+      serviceAccountName: {{ include "orbilnot.serviceAccountName" . }}
