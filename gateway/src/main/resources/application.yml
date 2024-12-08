@@ -32,3 +32,18 @@ spring:
           uri: http://billing-orbilnot
           predicates:
             - Path=/account/**
+
+        - id: kitchen
+          uri: http://kitchen-orbilnot
+          predicates:
+            - Path=/kitchen/**
+
+        - id: foodstuff
+          uri: http://foodstuff-orbilnot
+          predicates:
+            - Path=/foodstuff/**
+
+        - id: keycloak
+          uri: http://keycloak
+          predicates:
+            - Path=/auth/**

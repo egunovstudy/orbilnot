@@ -3,17 +3,12 @@ logging:
     org.springframework.security: INFO
 spring:
   application:
-    name: billing
+    name: order-service
   kafka:
     consumer:
       group-id: "order-service"
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      properties:
-        spring:
-          json:
-            type:
-              mapping: paymentEvent:com.gegunov.model.PaymentEvent
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -24,13 +19,14 @@ spring:
     url: jdbc:postgresql://${POSTGRES_SVC}:${POSTGRES_PORT}/${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
-payment:
-  events:
-    topic: payment.event
-order:
-  events:
-    topic: order.event
-
+    # the current backend is configured to be used as a resource server
+    # then, I must indicate the URI of the backend-auth to be used and which token to be used
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # issuer-uri: ${keycloack.baseurl}/realms/my_realm
+          jwk-set-uri: ${keycloak.baseurl}/realms/my_realm/protocol/openid-connect/certs
 
 openapi:
   orbilnot:
@@ -58,3 +54,36 @@ management:
         "[http.server.requests]": 0.5, 0.95, 0.99
       percentiles-histogram:
         "[http.server.requests]": true
+
+kitchen:
+  order:
+    events:
+      topic: kitchen.order.events
+  status:
+    events:
+      topic: kitchen.status.events
+reservation:
+  events:
+    topic: reservation.events
+  status:
+    events:
+      topic: reservation.status.events
+product:
+  update:
+    status:
+      events:
+        topic: product.update.status.events
+payment:
+  status:
+    events:
+      topic: payment.status.events
+order:
+  events:
+    topic: order.events
+
+keycloak:
+  baseurl: http://keycloak/auth
+
+user:
+  account:
+    url: ${keycloak.baseurl}/realms/my_realm/account/

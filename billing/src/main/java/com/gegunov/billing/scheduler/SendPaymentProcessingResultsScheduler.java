@@ -24,36 +24,36 @@ public class SendPaymentProcessingResultsScheduler {
 
     @Scheduled(fixedDelay = 1000)
     public void sendExecutedEvents() {
-        log.info("Sending payment confirmed events");
+        log.debug("Sending payment confirmed events");
         List<OrderEvent> confirmedOrderEvents = accountService.getPaymentConfirmedOrderEvents();
-        log.info("Found {} payment confirmed order events", confirmedOrderEvents.size());
+        log.debug("Found {} payment confirmed order events", confirmedOrderEvents.size());
         for (OrderEvent orderEvent : confirmedOrderEvents) {
-            log.info("Processing payment confirmed order event: {}", orderEvent);
+            log.debug("Processing payment confirmed order event: {}", orderEvent);
             PaymentEventMapper mapper = Mappers.getMapper(PaymentEventMapper.class);
             PaymentEvent paymentEvent = mapper.fromOrderEvent(orderEvent);
             messageSender.sendPaymentEvent(paymentEvent);
             orderEvent.setOrderEventState(OrderEventState.EXECUTED);
             accountService.updateOrderEvent(orderEvent);
-            log.info("Processed payment confirmed order event: {}", orderEvent);
+            log.debug("Processed payment confirmed order event: {}", orderEvent);
         }
-        log.info("Finished sending payment confirmed events");
+        log.debug("Finished sending payment confirmed events");
     }
 
     @Scheduled(fixedDelay = 1000)
     public void sendFailedEvents() {
-        log.info("Sending failed events");
+        log.debug("Sending failed events");
         List<OrderEvent> failedOrderEvents = accountService.getPaymentFailedOrderEvents();
-        log.info("Found {} failed order events", failedOrderEvents.size());
+        log.debug("Found {} failed order events", failedOrderEvents.size());
         for (OrderEvent orderEvent : failedOrderEvents) {
-            log.info("Processing failed order event: {}", orderEvent);
+            log.debug("Processing failed order event: {}", orderEvent);
             PaymentEventMapper mapper = Mappers.getMapper(PaymentEventMapper.class);
             PaymentEvent paymentEvent = mapper.fromOrderEvent(orderEvent);
             messageSender.sendPaymentEvent(paymentEvent);
             orderEvent.setOrderEventState(OrderEventState.EXECUTED);
             accountService.updateOrderEvent(orderEvent);
-            log.info("Processed failed order event: {}", orderEvent);
+            log.debug("Processed failed order event: {}", orderEvent);
         }
-        log.info("Finished sending failed events");
+        log.debug("Finished sending failed events");
     }
 
 }

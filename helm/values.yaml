@@ -1,10 +1,10 @@
 order:
   name: orbilnot-order
-  replicaCount: 2
+  replicaCount: 1
   container:
     repository: glebegunov/orbilnot-order
     pullPolicy: IfNotPresent
-    tag: "0.0.1"
+    tag: "0.0.2"
   livenessProbe:
     httpGet:
       path: /orders/actuator/health
@@ -13,11 +13,11 @@ order:
 
 billing:
   name: orbilnot-billing
-  replicaCount: 2
+  replicaCount: 1
   container:
     repository: glebegunov/orbilnot-billing
     pullPolicy: IfNotPresent
-    tag: "0.0.1"
+    tag: "0.0.2"
   livenessProbe:
     httpGet:
       path: /account/actuator/health
@@ -27,11 +27,11 @@ billing:
 
 notification:
   name: orbilnot-notification
-  replicaCount: 2
+  replicaCount: 1
   container:
     repository: glebegunov/orbilnot-notification
     pullPolicy: IfNotPresent
-    tag: "0.0.1"
+    tag: "0.0.2"
   livenessProbe:
     httpGet:
       path: /notifications/actuator/health
@@ -44,10 +44,36 @@ gateway:
   container:
     repository: glebegunov/orbilnot-gateway
     pullPolicy: IfNotPresent
-    tag: "0.0.1"
+    tag: "0.0.2"
   service:
     type: ClusterIP
     port: 8080
+
+kitchen:
+  name: orbilnot-kitchen
+  replicaCount: 1
+  container:
+    repository: glebegunov/orbilnot-kitchen
+    pullPolicy: IfNotPresent
+    tag: "0.0.2"
+  livenessProbe:
+    httpGet:
+      path: /kitchen/actuator/health
+      port: 8000
+    initialDelaySeconds: 60
+
+foodstuff:
+  name: orbilnot-foodstuff
+  replicaCount: 1
+  container:
+    repository: glebegunov/orbilnot-foodstuff
+    pullPolicy: IfNotPresent
+    tag: "0.0.2"
+  livenessProbe:
+    httpGet:
+      path: /foodstuff/actuator/health
+      port: 8000
+    initialDelaySeconds: 60
 
 service:
   port: 8000
@@ -109,7 +135,7 @@ job:
   restartPolicy: Never
   image:
     repository: glebegunov/orbilnot-migration
-    tag: 0.0.1
+    tag: 0.0.2
   pullPolicy: IfNotPresent
 
 postgresql:

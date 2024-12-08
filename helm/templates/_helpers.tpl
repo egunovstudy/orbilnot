@@ -77,3 +77,11 @@ Create the name of the service account to use
 {{- define "orbilnot.gateway.name" -}}
 {{- printf "gateway-%s" .Release.Name -}}
 {{- end }}
+
+{{- define "orbilnot.kitchen.name" -}}
+{{- printf "kitchen-%s" .Release.Name -}}
+{{- end }}
+
+{{- define "orbilnot.foodstuff.name" -}}
+{{- printf "foodstuff-%s" .Release.Name -}}
+{{- end }}

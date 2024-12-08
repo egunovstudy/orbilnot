@@ -18,9 +18,9 @@ public class ReceivedOrderEventsProcessingScheduler {
 
     @Scheduled(fixedRate = 1000)
     public void processReceivedOrders() {
-        log.info("Processing received order events...");
+        log.debug("Processing received order events...");
         List<OrderEvent> receivedOrderEvents = accountService.getReceivedOrderEvents();
-        log.info("Found {} order events", receivedOrderEvents.size());
+        log.debug("Found {} order events", receivedOrderEvents.size());
         for (OrderEvent orderEvent : receivedOrderEvents) {
             accountService.processOrderEvent(orderEvent);
 

@@ -1,25 +1,24 @@
 logging:
   level:
-    org.springframework.security: INFO
+    org.springframework.security: DEBUG
 spring:
   application:
-    name: notifications
+    name: notification-service
   jpa:
     database: postgresql
   datasource:
     url: jdbc:postgresql://${POSTGRES_SVC}:${POSTGRES_PORT}/${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
+    # the current backend is configured to be used as a resource server
+    # then, I must indicate the URI of the backend-auth to be used and which token to be used
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # issuer-uri: ${keycloack.baseurl}/realms/my_realm
+          jwk-set-uri: ${keycloak.baseurl}/realms/my_realm/protocol/openid-connect/certs
   kafka:
-    consumer:
-      group-id: "notification-service"
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      properties:
-        spring:
-          json:
-            type:
-              mapping: paymentEvent:com.gegunov.model.PaymentEvent
     bootstrap-servers: orbilnot-kafka:9092
 openapi:
   orbilnot:
@@ -49,8 +48,25 @@ management:
         "[http.server.requests]": true
 
 payment:
-  events:
-    topic: payment.event
+  status:
+    events:
+      topic: payment.status.events
 order:
   events:
     topic: order.event
+
+kitchen:
+  status:
+    events:
+      topic: kitchen.status.events
+
+keycloak:
+  baseurl: http://keycloak/auth
+
+user:
+  account:
+    url: ${keycloak.baseurl}/realms/my_realm/account/
+
+mail:
+  password: dQCusbEQxLTcysPrAWWV
+  username: tube90@mail.ru

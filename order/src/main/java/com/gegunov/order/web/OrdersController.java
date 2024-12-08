@@ -23,13 +23,9 @@ public class OrdersController {
 
     @PostMapping
     public ResponseEntity<UUID> create(@RequestBody OrderAction orderAction) {
-        return ResponseEntity.ok(orderService.createOrder(orderAction));
+        return ResponseEntity.ok(orderService.createOrderAndReserveProductStock(orderAction));
     }
 
-    @PutMapping
-    public void update(@RequestBody OrderAction orderAction) {
-        orderService.updateOrderAmount(orderAction);
-    }
 
     @DeleteMapping
     public void delete(@RequestBody OrderAction orderAction) {

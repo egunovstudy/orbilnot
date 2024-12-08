@@ -1,10 +1,7 @@
 package com.gegunov.billing;
 
-import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.config.SaslConfigs;
-import org.apache.kafka.common.security.plain.PlainLoginModule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,6 +14,9 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,11 +40,11 @@ public class BillingApplication {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
-        props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT");
-        props.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
-        props.put(SaslConfigs.SASL_JAAS_CONFIG, String.format(
-                "%s required username=\"%s\" " + "password=\"%s\";", PlainLoginModule.class.getName(), "user1", "qp6weqcnfE"
-        ));
+//        props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT");
+//        props.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
+//        props.put(SaslConfigs.SASL_JAAS_CONFIG, String.format(
+//                "%s required username=\"%s\" " + "password=\"%s\";", PlainLoginModule.class.getName(), "user1", "qp6weqcnfE"
+//        ));
 
         return new DefaultKafkaProducerFactory<>(props);
     }
@@ -59,13 +59,23 @@ public class BillingApplication {
         props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 
-        props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT");
-        props.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
-        props.put(SaslConfigs.SASL_JAAS_CONFIG, String.format(
-                "%s required username=\"%s\" " + "password=\"%s\";", PlainLoginModule.class.getName(), "user1", "qp6weqcnfE"
-        ));
+//        props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT");
+//        props.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
+//        props.put(SaslConfigs.SASL_JAAS_CONFIG, String.format(
+//                "%s required username=\"%s\" " + "password=\"%s\";", PlainLoginModule.class.getName(), "user1", "qp6weqcnfE"
+//        ));
 
         return new DefaultKafkaConsumerFactory<>(props);
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests((authorize) -> authorize.requestMatchers("/actuator/**").permitAll())
+                .authorizeHttpRequests((authorize) -> authorize.requestMatchers("/error/**").permitAll())
+                .authorizeHttpRequests((authorize) -> authorize.requestMatchers("/**").authenticated())
+                .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()));
+
+        return http.build();
     }
 
 }

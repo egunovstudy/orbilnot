@@ -12,6 +12,7 @@ import com.gegunov.model.OrderEventType;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,10 +47,10 @@ public class AccountService {
     }
 
     @Transactional
-    public UUID createNewAccount(AccountAction accountAction) {
+    public UUID createNewAccount(Authentication authentication, AccountAction accountAction) {
         Account account = new Account();
         account.setBalance(accountAction.getAmount());
-        account.setId(UUID.randomUUID());
+        account.setId(UUID.fromString(authentication.getName()));
         accountRepository.save(account);
         return account.getId();
     }

@@ -12,6 +12,11 @@
                 <executions>
                     <execution>
                         <phase>compile</phase>
+                        <goals>
+                            <goal>
+                                update
+                            </goal>
+                        </goals>
                     </execution>
                 </executions>
                 <configuration>

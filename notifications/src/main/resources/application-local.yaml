@@ -1,3 +1,4 @@
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres
@@ -5,3 +6,12 @@ spring:
     password: qwerty
   kafka:
     bootstrap-servers: localhost:9092, localhost:9093, localhost:9094
+server:
+  port: 8084
+
+mail:
+  password: dQCusbEQxLTcysPrAWWV
+  username: tube90@mail.ru
+
+keycloak:
+  baseurl: http://localhost:8888/auth

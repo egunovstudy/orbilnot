@@ -16,8 +16,7 @@ import java.util.UUID;
 public class OrderEvent {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "billing.order_events_id_seq")
-    private Long id;
+    private UUID id;
 
     @Column(name = "order_number")
     private String orderNumber;

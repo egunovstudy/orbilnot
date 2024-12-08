@@ -3,42 +3,128 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-    <changeSet id="1" author="glebegunov">
+    <changeSet id="1-create_schemas" author="glebegunov">
         <sql>
             create schema order_service;
             create schema billing;
             create schema notification_service;
-
-            create table if not exists order_service.orders
+            create schema kitchen_service;
+            create schema foodstuff_service;
+        </sql>
+    </changeSet>
+    <changeSet id="2_create_order_tables" author="glebegunov">
+        <sql>
+            CREATE TABLE order_service.menu_items
             (
-                id uuid,
-                order_number varchar,
-                account_id uuid,
-                last_name varchar,
-                email varchar,
-                phone varchar,
-                amount integer,
-                order_status varchar,
-                order_date date
+                id          UUID NOT NULL,
+                code        VARCHAR(255),
+                name        VARCHAR(255),
+                description VARCHAR(255),
+                price       DECIMAL,
+                CONSTRAINT pk_menu_items PRIMARY KEY (id)
             );
 
-            create table if not exists billing.order_events
+            CREATE TABLE order_service.products
             (
-                id bigserial primary key,
-                order_number varchar,
-                event_type varchar,
-                amount integer,
-                account_id uuid,
-                order_event_state varchar,
-                error_message varchar
+                id   UUID NOT NULL,
+                code VARCHAR(255),
+                name VARCHAR(255),
+                CONSTRAINT pk_products PRIMARY KEY (id)
             );
 
-            create table if not exists billing.accounts
+            CREATE TABLE order_service.ingredients
             (
-                id uuid PRIMARY KEY,
-                balance numeric
+                id              UUID    NOT NULL,
+                product_id      UUID,
+                required_amount INTEGER NOT NULL,
+                menu_item_id    UUID,
+                CONSTRAINT pk_ingredients PRIMARY KEY (id)
             );
 
+            ALTER TABLE order_service.ingredients
+                ADD CONSTRAINT FK_INGREDIENTS_ON_MENU_ITEM FOREIGN KEY (menu_item_id) REFERENCES order_service.menu_items (id);
+
+            ALTER TABLE order_service.ingredients
+                ADD CONSTRAINT FK_INGREDIENTS_ON_PRODUCT FOREIGN KEY (product_id) REFERENCES order_service.products (id);
+
+            CREATE TABLE order_service.orders
+            (
+                id           UUID NOT NULL,
+                order_number VARCHAR(255),
+                account_id   UUID,
+                order_date   TIMESTAMP WITHOUT TIME ZONE,
+                amount       DECIMAL,
+                order_status VARCHAR(255),
+                CONSTRAINT pk_orders PRIMARY KEY (id)
+            );
+
+            CREATE TABLE order_service.order_items
+            (
+                id          UUID NOT NULL,
+                name        VARCHAR(255),
+                code        VARCHAR(255),
+                description VARCHAR(255),
+                price       DECIMAL,
+                order_id    UUID,
+                CONSTRAINT pk_order_items PRIMARY KEY (id)
+            );
+
+            CREATE TABLE order_service.order_items_ingredients
+            (
+                ingredient_id UUID NOT NULL,
+                order_item_id UUID NOT NULL
+            );
+
+            CREATE TABLE order_service.product_stock
+            (
+                id         UUID    NOT NULL,
+                product_id UUID,
+                quantity   INTEGER NOT NULL,
+                order_id   UUID,
+                status     VARCHAR(255),
+                CONSTRAINT pk_product_stock PRIMARY KEY (id)
+            );
+
+            ALTER TABLE order_service.order_items
+                ADD CONSTRAINT FK_ORDER_ITEMS_ON_ORDER FOREIGN KEY (order_id) REFERENCES order_service.orders (id);
+
+            ALTER TABLE order_service.order_items_ingredients
+                ADD CONSTRAINT fk_orditeing_on_ingredient FOREIGN KEY (ingredient_id) REFERENCES order_service.ingredients (id);
+
+            ALTER TABLE order_service.order_items_ingredients
+                ADD CONSTRAINT fk_orditeing_on_order_item FOREIGN KEY (order_item_id) REFERENCES order_service.order_items (id);
+
+            ALTER TABLE order_service.product_stock
+                ADD CONSTRAINT FK_PRODUCT_STOCK_ON_PRODUCT FOREIGN KEY (product_id) REFERENCES order_service.products (id);
+
+            ALTER TABLE order_service.product_stock
+                ADD CONSTRAINT FK_PRODUCT_STOCK_ON_ORDER FOREIGN KEY (order_id) REFERENCES order_service.orders (id);
+
+        </sql>
+    </changeSet>
+    <changeSet id="3_create_billing_tables" author="glebegunov">
+        <sql>
+            CREATE TABLE billing.order_events
+            (
+                id      UUID NOT NULL,
+                order_number      VARCHAR(255),
+                event_type        VARCHAR(255),
+                amount            DECIMAL,
+                account_id        UUID,
+                order_event_state VARCHAR(255),
+                error_message     VARCHAR(255),
+                CONSTRAINT pk_order_events PRIMARY KEY (id)
+            );
+            CREATE TABLE billing.accounts
+            (
+                id      UUID NOT NULL,
+                balance DECIMAL,
+                CONSTRAINT pk_accounts PRIMARY KEY (id)
+            );
+        </sql>
+    </changeSet>
+    <changeSet id="4_create_notification_tables" author="glebegunov">
+        <sql>
             create table if not exists notification_service.notifications
             (
                 id bigserial primary key,
@@ -47,6 +133,68 @@
                 notification_type varchar,
                 account_id uuid
             );
+        </sql>
+    </changeSet>
+    <changeSet id="5_create_kitchen_table" author="glebegunov">
+        <sql>
+            CREATE TABLE kitchen_service.kitchen_orders
+            (
+                id           UUID NOT NULL,
+                account_id   UUID,
+                order_number VARCHAR(255),
+                status       VARCHAR(255),
+                CONSTRAINT pk_kitchen_orders PRIMARY KEY (id)
+            );
+
+            CREATE TABLE kitchen_service.order_items
+            (
+                id        UUID NOT NULL,
+                order_id  UUID,
+                dish_name VARCHAR(255),
+                details   VARCHAR(255),
+                CONSTRAINT pk_order_items PRIMARY KEY (id)
+            );
+
+            ALTER TABLE kitchen_service.order_items
+                ADD CONSTRAINT FK_ORDER_ITEMS_ON_ORDER FOREIGN KEY (order_id) REFERENCES kitchen_service.kitchen_orders (id);
+
+        </sql>
+    </changeSet>
+    <changeSet id="6_create_foodstuff_table" author="glebegunov">
+        <sql>
+            CREATE TABLE foodstuff_service.products
+            (
+                id          UUID NOT NULL,
+                name        VARCHAR(255),
+                description VARCHAR(255),
+                code        VARCHAR(255),
+                CONSTRAINT pk_products PRIMARY KEY (id)
+            );
+
+            CREATE TABLE foodstuff_service.reservations
+            (
+                id           UUID NOT NULL,
+                order_number VARCHAR(255),
+                account_id   UUID,
+                status       VARCHAR(255),
+                CONSTRAINT pk_reservations PRIMARY KEY (id)
+            );
+
+            CREATE TABLE foodstuff_service.product_stock
+            (
+                id             UUID    NOT NULL,
+                product_id     UUID,
+                quantity       INTEGER NOT NULL,
+                reservation_id UUID,
+                status         VARCHAR(255),
+                CONSTRAINT pk_product_stock PRIMARY KEY (id)
+            );
+
+            ALTER TABLE foodstuff_service.product_stock
+                ADD CONSTRAINT FK_PRODUCT_STOCK_ON_PRODUCT FOREIGN KEY (product_id) REFERENCES foodstuff_service.products (id);
+
+            ALTER TABLE foodstuff_service.product_stock
+                ADD CONSTRAINT FK_PRODUCT_STOCK_ON_RESERVATION FOREIGN KEY (reservation_id) REFERENCES foodstuff_service.reservations (id);
 
         </sql>
     </changeSet>

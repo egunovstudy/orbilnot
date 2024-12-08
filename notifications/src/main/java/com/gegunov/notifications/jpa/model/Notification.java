@@ -1,6 +1,5 @@
 package com.gegunov.notifications.jpa.model;
 
-import com.gegunov.model.PaymentEventType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,10 +18,8 @@ public class Notification {
 
     private String title;
     private String body;
-
-    @Enumerated(EnumType.STRING)
     @Column(name = "notification_type")
-    private PaymentEventType notificationType;
+    private String notificationType;
 
     private UUID accountId;
 

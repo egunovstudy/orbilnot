@@ -14,18 +14,19 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderEventSender {
 
-    private static final String TYPE_ID_HEADER_NAME = "__TYPE_ID__";
+    private static final String TYPE_ID_HEADER_NAME = "__KEY_TYPEID__";
+    private static final byte[] BILLING_EVENT_CLASS_NAME = OrderEvent.class.getName().getBytes(StandardCharsets.UTF_8);
 
     @Value("${order.events.topic}")
-    private String topic;
-    private static final byte[] ORDER_EVENT_CLASS_NAME = OrderEvent.class.getName().getBytes(StandardCharsets.UTF_8);
-    private final KafkaTemplate<String, OrderEvent> kafkaTemplate;
+    private String billingTopic;
 
-    public void send(OrderEvent orderEvent) {
-        ProducerRecord<UUID, OrderEvent> record = new ProducerRecord<>(topic, orderEvent.getAccountId(), orderEvent);
-        record.headers().add(TYPE_ID_HEADER_NAME, ORDER_EVENT_CLASS_NAME);
+    private final KafkaTemplate<UUID, OrderEvent> kafkaTemplate;
 
-        kafkaTemplate.send(topic, orderEvent);
+    public void sendOrderToBilling(OrderEvent orderEvent) {
+        ProducerRecord<UUID, OrderEvent> record = new ProducerRecord<>(billingTopic, orderEvent);
+        record.headers().add(TYPE_ID_HEADER_NAME, BILLING_EVENT_CLASS_NAME);
+
+        kafkaTemplate.send(record);
     }
 
 }

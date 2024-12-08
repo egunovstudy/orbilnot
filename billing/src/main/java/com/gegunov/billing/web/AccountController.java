@@ -6,6 +6,7 @@ import com.gegunov.billing.web.model.AccountAction;
 import jdk.jfr.ContentType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -25,8 +26,8 @@ public class AccountController {
     }
 
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<UUID> createAccount(@RequestBody AccountAction action) {
-        return ResponseEntity.ok(accountService.createNewAccount(action));
+    public ResponseEntity<UUID> createAccount(Authentication authentication, @RequestBody AccountAction action) {
+        return ResponseEntity.ok(accountService.createNewAccount(authentication, action));
     }
 
     @GetMapping(path = "/{accountId}")
