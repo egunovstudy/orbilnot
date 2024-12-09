@@ -1,6 +1,7 @@
 package com.gegunov.foodstuff.messages.listener;
 
 import com.gegunov.foodstuff.service.FoodstuffService;
+import com.gegunov.foodstuff.service.ReservationService;
 import com.gegunov.model.PaymentEvent;
 import com.gegunov.model.PaymentEventType;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class BillingEventListener {
 
     private final FoodstuffService foodstuffService;
+    private final ReservationService reservationService;
 
     @KafkaListener(topics = { "${payment.status.events.topic}" }, groupId = "foodstuff-service-consumer")
     public void listen(ConsumerRecord<String, PaymentEvent> record) {
@@ -20,6 +22,7 @@ public class BillingEventListener {
 
         if (paymentEvent.getPaymentEventType() == PaymentEventType.PAYMENT_DENIED) {
             foodstuffService.changeReservedProductsToInArchive(paymentEvent.getOrderNumber());
+            reservationService.archiveReservations(paymentEvent.getOrderNumber());
         }
     }
 }

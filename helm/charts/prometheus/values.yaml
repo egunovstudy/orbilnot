@@ -1208,11 +1208,26 @@ serverFiles:
 # must be a string so you have to add a | after extraScrapeConfigs:
 # example adds prometheus-blackbox-exporter scrape config
 extraScrapeConfigs: |
-  - job_name: 'simple_crud_in_k8s'
-    metrics_path: '/simple-crud/actuator/prometheus'
+  - job_name: 'orbilnot-billing'
+    metrics_path: '/account/actuator/prometheus'
     scrape_interval: 15s # This can be adjusted based on our needs
     static_configs:
-      - targets: ['simple-crud:80']
+      - targets: ['billing-orbilnot:80']
+  - job_name: 'orbilnot-order'
+    metrics_path: '/orders/actuator/prometheus'
+    scrape_interval: 15s # This can be adjusted based on our needs
+    static_configs:
+      - targets: [ 'order-orbilnot:80' ]
+  - job_name: 'orbilnot-foodstuff'
+    metrics_path: '/foodstuff/actuator/prometheus'
+    scrape_interval: 15s # This can be adjusted based on our needs
+    static_configs:
+      - targets: [ 'foodstuff-orbilnot:80' ]
+  - job_name: 'orbilnot-kitchen'
+    metrics_path: '/kitchen/actuator/prometheus'
+    scrape_interval: 15s # This can be adjusted based on our needs
+    static_configs:
+      - targets: [ 'kitchen-orbilnot:80' ]
   - job_name: 'nginx'
     metrics_path: '/metrics'
     scrape_interval: 15s # This can be adjusted based on our needs

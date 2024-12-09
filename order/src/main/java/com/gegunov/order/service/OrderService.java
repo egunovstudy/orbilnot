@@ -61,6 +61,7 @@ public class OrderService {
         orderRepository.delete(order);
     }
 
+    @Transactional
     public List<OrderAction> getOrders(UUID accountId) {
         List<Order> orders = orderRepository.findByAccountId(accountId);
         OrderMapper mapper = Mappers.getMapper(OrderMapper.class);

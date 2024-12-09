@@ -72,10 +72,10 @@ public class FoodstuffService {
         updateProductStock(reservations, ProductStock.ProductStockStatus.ARCHIVE);
     }
 
-    private void updateProductStock(List<Reservation> reservations, ProductStock.ProductStockStatus inSync) {
+    private void updateProductStock(List<Reservation> reservations, ProductStock.ProductStockStatus status) {
         reservations.forEach((Reservation reservation) -> {
             for (ProductStock productStock : reservation.getProductStock()) {
-                productStock.setStatus(inSync);
+                productStock.setStatus(status);
                 productStockRepository.save(productStock);
             }
         });

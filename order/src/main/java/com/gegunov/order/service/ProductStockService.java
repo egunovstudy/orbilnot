@@ -25,6 +25,7 @@ public class ProductStockService {
         List<ProductStock> productStocks = productStockRepository.findByOrder(order);
         for (ProductStock productStock : productStocks) {
             productStock.setStatus(ARCHIVE);
+            productStockRepository.save(productStock);
         }
     }
 
@@ -33,6 +34,7 @@ public class ProductStockService {
         List<ProductStock> productStocks = productStockRepository.findByOrder(order);
         for (ProductStock productStock : productStocks) {
             productStock.setStatus(COOKED);
+            productStockRepository.save(productStock);
         }
     }
 

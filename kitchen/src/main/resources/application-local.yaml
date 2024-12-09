@@ -4,8 +4,11 @@ spring:
   jpa:
     database: postgresql
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://localhost:5431/postgres
     username: postgres
     password: qwerty
   kafka:
     bootstrap-servers: localhost:9092, localhost:9093, localhost:9094
+
+keycloak:
+  baseurl: http://localhost:8888/auth

@@ -5,7 +5,8 @@ import com.gegunov.kitchen.jpa.model.KitchenOrderStatus;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface KitchenOrderRepository extends CrudRepository<KitchenOrder, Long> {
+public interface KitchenOrderRepository extends CrudRepository<KitchenOrder, UUID> {
     List<KitchenOrder> findByStatus(KitchenOrderStatus status);
 }

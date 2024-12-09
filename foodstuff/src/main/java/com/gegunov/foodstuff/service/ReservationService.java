@@ -42,6 +42,7 @@ public class ReservationService {
             productStock.setQuantity(ingredientDTO.getRequiredAmount());
             productStock.setId(UUID.randomUUID());
             productStock.setStatus(ProductStock.ProductStockStatus.RESERVED);
+            productStock.setReservation(reservationEntity);
             productStockRepository.save(productStock);
         }
 

@@ -27,8 +27,10 @@ public class KitchenOrderService {
     }
 
     public void updateKitchenOrder(KitchenOrder kitchenOrder) {
-        kitchenOrderRepository.save(kitchenOrder);
-
+        kitchenOrderRepository.findById(kitchenOrder.getId()).ifPresent(ko -> {
+            ko.setStatus(kitchenOrder.getStatus());
+            kitchenOrderRepository.save(ko);
+        });
     }
 
     public Iterable<KitchenOrder> getPreparedOrders() {
