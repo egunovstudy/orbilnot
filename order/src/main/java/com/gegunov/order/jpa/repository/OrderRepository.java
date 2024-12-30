@@ -8,10 +8,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface OrderRepository extends CrudRepository<Order, Long> {
+public interface OrderRepository extends CrudRepository<Order, UUID> {
     Optional<Order> findByAccountIdAndOrderNumber(UUID accountId, String id);
 
     List<Order> findByAccountId(UUID accountId);
 
     List<Order> findByOrderStatus(OrderStatus orderStatus);
+
 }

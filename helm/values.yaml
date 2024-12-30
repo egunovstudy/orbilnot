@@ -17,7 +17,7 @@ billing:
   container:
     repository: glebegunov/orbilnot-billing
     pullPolicy: IfNotPresent
-    tag: "0.0.2"
+    tag: "0.0.3"
   livenessProbe:
     httpGet:
       path: /account/actuator/health
