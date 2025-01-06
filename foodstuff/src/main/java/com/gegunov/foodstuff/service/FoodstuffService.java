@@ -66,10 +66,10 @@ public class FoodstuffService {
     }
 
     @Transactional
-    public void changeReservedProductsToInArchive(String orderNumber) {
+    public void changeReservedProductsToAvailable(String orderNumber) {
         List<Reservation> reservations = reservationRepository.findByOrderNumberAndStatus(orderNumber,
                 Reservation.Status.ACTIVE);
-        updateProductStock(reservations, ProductStock.ProductStockStatus.ARCHIVE);
+        updateProductStock(reservations, ProductStock.ProductStockStatus.AVAILABLE);
     }
 
     private void updateProductStock(List<Reservation> reservations, ProductStock.ProductStockStatus status) {

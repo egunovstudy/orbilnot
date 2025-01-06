@@ -21,7 +21,7 @@ public class BillingEventListener {
         PaymentEvent paymentEvent = record.value();
 
         if (paymentEvent.getPaymentEventType() == PaymentEventType.PAYMENT_DENIED) {
-            foodstuffService.changeReservedProductsToInArchive(paymentEvent.getOrderNumber());
+            foodstuffService.changeReservedProductsToAvailable(paymentEvent.getOrderNumber());
             reservationService.archiveReservations(paymentEvent.getOrderNumber());
         }
     }

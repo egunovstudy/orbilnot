@@ -17,7 +17,7 @@ public class KitchenStatusEventHandler {
             foodstuffService.changeReservedProductsToCooked(kitchenStatusEvent.getOrderNumber());
             reservationService.archiveReservations(kitchenStatusEvent.getOrderNumber());
         } else if (kitchenStatusEvent.getStatus() == KitchenStatus.CANCELLED) {
-            foodstuffService.changeReservedProductsToInArchive(kitchenStatusEvent.getOrderNumber());
+            foodstuffService.changeReservedProductsToAvailable(kitchenStatusEvent.getOrderNumber());
             reservationService.archiveReservations(kitchenStatusEvent.getOrderNumber());
         } else {
             throw new IllegalStateException("Unexpected kitchen status: " + kitchenStatusEvent.getStatus());
