@@ -1,0 +1,962 @@
+{
+	"info": {
+		"_postman_id": "64edf1d4-abb7-41a1-aa3e-4bb0eecff962",
+		"name": "saga_example",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1776670"
+	},
+	"item": [
+		{
+			"name": "00 register users",
+			"item": [
+				{
+					"name": "get master token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var accessToken = pm.response.json()['access_token']",
+									"pm.collectionVariables.set(\"masterAccessToken\", accessToken);",
+									"console.log('Получен masterAccessToken для регистрации пользователей')"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "frontend-client",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "{{master_username}}",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{keycloak_baseurl}}/auth/realms/my_realm/protocol/openid-connect/token",
+							"host": [
+								"{{keycloak_baseurl}}"
+							],
+							"path": [
+								"auth",
+								"realms",
+								"my_realm",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "register user A",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const lodash = require('lodash');",
+									"let user_A_username =pm.collectionVariables.get(\"default_username\") + \"a\" + lodash.random(10);",
+									"pm.collectionVariables.set('user_A_username', user_A_username)",
+									"pm.collectionVariables.set('user_A_field_value',pm.collectionVariables.get('user_A_username'))",
+									"console.log(\"Регистрация пользоватебя A\")",
+									"console.log(\"user_A_username = \" + user_A_username + \", user_A_field_value = \" + pm.collectionVariables.get('user_A_field_value'))"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Register user A info. Status code is 201\", ()=>{",
+									"    pm.expect(pm.response.code).to.eql(201);",
+									"    console.log(\"Пользователь А успешно зарегистрирован\")",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{masterAccessToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{user_A_username}}\",\n    \"firstName\": \"{{user_A_field_value}}\",\n    \"lastName\": \"{{user_A_field_value}}\",\n    \"email\": \"{{user_A_field_value}}@mail.com\",\n    \"emailVerified\": true,\n    \"enabled\": true,\n    \"attributes\": {\n        \"phone\": \"{{user_A_field_value}}\"\n    },\n    \"credentials\": [\n        {\n            \"temporary\": false,\n            \"type\": \"password\",\n            \"value\": \"{{password}}\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{keycloak_baseurl}}/auth/admin/realms/my_realm/users",
+							"host": [
+								"{{keycloak_baseurl}}"
+							],
+							"path": [
+								"auth",
+								"admin",
+								"realms",
+								"my_realm",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_user_A_access_token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Register user A info. Status code is 200\", ()=>{",
+									"    pm.expect(pm.response.code).to.eql(200);",
+									"    pm.expect(pm.response.json()['access_token']).not.to.be.an('undefined')",
+									"    pm.collectionVariables.set('user_A_access_token', pm.response.json()['access_token'])",
+									"    console.log('Получен access_token пользователя A')",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "frontend-client",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "{{user_A_username}}",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{keycloak_baseurl}}/auth/realms/my_realm/protocol/openid-connect/token",
+							"host": [
+								"{{keycloak_baseurl}}"
+							],
+							"path": [
+								"auth",
+								"realms",
+								"my_realm",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "01 foodstuff",
+			"item": [
+				{
+					"name": "create_or_update_product_BUN",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_A_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{   \n    \"name\":\"булочка\",\n    \"description\": \"ароматная кунжутная булочка\",\n    \"code\": \"bun\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{foodstuff_url}}/",
+							"host": [
+								"{{foodstuff_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create_or_update_product_PATTY",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_A_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{   \n    \"name\":\"котлета\",\n    \"description\": \"сочная котлета на гриле\",\n    \"code\": \"patty\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{foodstuff_url}}/",
+							"host": [
+								"{{foodstuff_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create_or_update_product_CHEESE",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_A_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{   \n    \"name\":\"сыр\",\n    \"description\": \"нежный плавленый сырок\",\n    \"code\": \"cheese\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{foodstuff_url}}/",
+							"host": [
+								"{{foodstuff_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "change_product_quantity bun",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_A_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{   \n    \"requestUuid\": \"{{$randomUUID}}\",\n    \"code\": \"bun\",\n    \"quantity\": 4\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{foodstuff_url}}/",
+							"host": [
+								"{{foodstuff_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "change_product_quantity cheese",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_A_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{   \n    \"requestUuid\": \"{{$randomUUID}}\",\n    \"code\": \"cheese\",\n    \"quantity\": 4\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{foodstuff_url}}/",
+							"host": [
+								"{{foodstuff_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "change_product_quantity patty",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_A_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{   \n    \"requestUuid\": \"{{$randomUUID}}\",\n    \"code\": \"patty\",\n    \"quantity\": 4\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{foodstuff_url}}/",
+							"host": [
+								"{{foodstuff_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02 billing",
+			"item": [
+				{
+					"name": "create_new_account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.expect(pm.response.code).to.equal(200);",
+									"  console.log('New account has been created');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response has the correct Content-Type header\", function () {",
+									"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Response body is not empty\", function () {",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData).to.not.be.empty;",
+									"});",
+									"",
+									"",
+									"pm.test(\"Validate the structure of the JSON response\", function () {",
+									"    const responseData = pm.response.json();",
+									"    console.log('Received account ID: ' + responseData);",
+									"    pm.collectionVariables.set('account_id', responseData)",
+									"    pm.expect(responseData).to.be.a('string');",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_A_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"actionType\" : \"CREATE_NEW\",\n    \"amount\": 0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{billing_service_url}}/",
+							"host": [
+								"{{billing_service_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deposit_money_on_account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.expect(pm.response.code).to.equal(200);",
+									"  console.log('600 has been put on the account: ' + pm.collectionVariables.get('account_id'));",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_A_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"accountId\": \"{{account_id}}\",\n    \"amount\": 600,\n    \"actionType\": \"DEPOSIT_MONEY\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{billing_service_url}}/",
+							"host": [
+								"{{billing_service_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "03 order_service",
+			"item": [
+				{
+					"name": "create_menu_item",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.log('Wait until all the changes are synchronized');",
+									"setTimeout(function(){}, 3500);",
+									"console.log('Creating menu itme');"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_A_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"request_uuid\": \"{{$randomUUID}}\",\n    \"code\":\"gamb\",\n    \"name\": \"двойной гамбургер\",\n    \"price\": 350,\n    \"description\":  \"классический вкус и больше мяса\",\n    \"ingredients\":  [\n        {\n        \"product\": {\n            \"code\": \"patty\"\n        },\n        \"requiredAmount\" : 2\n        },\n        {\n            \"product\":{\n                \"code\": \"bun\"\n            },\n            \"requiredAmount\" : 1\n        },\n        {\n            \"product\":{\n                \"code\" : \"cheese\"\n            },\n            \"requiredAmount\" :1\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{order_service_url}}/menu",
+							"host": [
+								"{{order_service_url}}"
+							],
+							"path": [
+								"menu"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "find_all_menu_items",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.expect(pm.response.code).to.equal(200);",
+									"  console.log('Received list of menu items');",
+									"});",
+									"",
+									"pm.collectionVariables.set('available_quantity', pm.response.json()[0]['availableQuantity']);",
+									"",
+									"pm.collectionVariables.set('order_item', JSON.stringify(pm.response.json()[0]));"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_A_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{order_service_url}}/menu",
+							"host": [
+								"{{order_service_url}}"
+							],
+							"path": [
+								"menu"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create_order_enough_money",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"console.log('Wait until all the changes are synchronized');",
+									"setTimeout(function(){}, 3500);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_A_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"accountId\": \"{{account_id}}\",\n    \"orderItems\": [\n       {{order_item}}\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{order_service_url}}/",
+							"host": [
+								"{{order_service_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "find_all_menu_items_again",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.expect(pm.response.code).to.equal(200);",
+									"  console.log('Received list of menu items');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Available quantity has CHANGED.\", function(){",
+									"    pm.expect(pm.response.json()[0]['availableQuantity']).to.be.equal(pm.collectionVariables.get('available_quantity') - 1);",
+									"    console.log('availableQuantity for menu item decreased AS EXPECTED')",
+									"})",
+									"",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_A_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{order_service_url}}/menu",
+							"host": [
+								"{{order_service_url}}"
+							],
+							"path": [
+								"menu"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create_order_NOT_enough_money",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"console.log('Wait until all the changes are synchronized');",
+									"setTimeout(function(){}, 3500);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_A_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"accountId\": \"{{account_id}}\",\n    \"orderItems\": [\n       {{order_item}}\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{order_service_url}}/",
+							"host": [
+								"{{order_service_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "find_all_menu_items_after_not_enough_money",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response status code is 200\", function () {",
+									"  pm.expect(pm.response.code).to.equal(200);",
+									"  console.log('Received list of menu items');",
+									"});",
+									"",
+									"",
+									"pm.test(\"Available quantity has NOT changed.\", function(){",
+									"    pm.expect(pm.response.json()[0]['availableQuantity']).to.be.equal(pm.collectionVariables.get('available_quantity') - 1);",
+									"    console.log('availableQuantity for menu item DID NOT decrease AS EXPECTED')",
+									"})"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_A_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{order_service_url}}/menu",
+							"host": [
+								"{{order_service_url}}"
+							],
+							"path": [
+								"menu"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "master_username",
+			"value": "user"
+		},
+		{
+			"key": "password",
+			"value": "qwerty",
+			"type": "string"
+		},
+		{
+			"key": "masterAccessToken",
+			"value": ""
+		},
+		{
+			"key": "user_A_username",
+			"value": ""
+		},
+		{
+			"key": "user_A_field_value",
+			"value": ""
+		},
+		{
+			"key": "user_A_access_token",
+			"value": ""
+		},
+		{
+			"key": "account_id",
+			"value": ""
+		},
+		{
+			"key": "order_item",
+			"value": ""
+		},
+		{
+			"key": "available_quantity",
+			"value": ""
+		}
+	]
+}

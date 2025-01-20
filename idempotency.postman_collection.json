@@ -1,0 +1,413 @@
+{
+	"info": {
+		"_postman_id": "c477248d-059f-49a7-a54b-7e47e12759cc",
+		"name": "idempotency",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1776670"
+	},
+	"item": [
+		{
+			"name": "get master token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var accessToken = pm.response.json()['access_token']",
+							"pm.collectionVariables.set(\"masterAccessToken\", accessToken);",
+							"console.log('Получен masterAccessToken для регистрации пользователей')"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "frontend-client",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "{{master_username}}",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "{{password}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{keycloak_baseurl}}/auth/realms/my_realm/protocol/openid-connect/token",
+					"host": [
+						"{{keycloak_baseurl}}"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"my_realm",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "register user A",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const lodash = require('lodash');",
+							"let user_A_username =pm.collectionVariables.get(\"default_username\") + \"a\" + lodash.random(10);",
+							"pm.collectionVariables.set('user_A_username', user_A_username)",
+							"pm.collectionVariables.set('user_A_field_value',pm.collectionVariables.get('user_A_username'))",
+							"console.log(\"Регистрация пользоватебя A\")",
+							"console.log(\"user_A_username = \" + user_A_username + \", user_A_field_value = \" + pm.collectionVariables.get('user_A_field_value'))"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Register user A info. Status code is 201\", ()=>{",
+							"    pm.expect(pm.response.code).to.eql(201);",
+							"    console.log(\"Пользователь А успешно зарегистрирован\")",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{masterAccessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"{{user_A_username}}\",\n    \"firstName\": \"{{user_A_field_value}}\",\n    \"lastName\": \"{{user_A_field_value}}\",\n    \"email\": \"{{user_A_field_value}}@mail.com\",\n    \"emailVerified\": true,\n    \"enabled\": true,\n    \"attributes\": {\n        \"phone\": \"{{user_A_field_value}}\"\n    },\n    \"credentials\": [\n        {\n            \"temporary\": false,\n            \"type\": \"password\",\n            \"value\": \"{{password}}\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{keycloak_baseurl}}/auth/admin/realms/my_realm/users",
+					"host": [
+						"{{keycloak_baseurl}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"my_realm",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_user_A_access_token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Register user A info. Status code is 200\", ()=>{",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"    pm.expect(pm.response.json()['access_token']).not.to.be.an('undefined')",
+							"    pm.collectionVariables.set('user_A_access_token', pm.response.json()['access_token'])",
+							"    console.log('Получен access_token пользователя A')",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "frontend-client",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "{{user_A_username}}",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "{{password}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{keycloak_baseurl}}/auth/realms/my_realm/protocol/openid-connect/token",
+					"host": [
+						"{{keycloak_baseurl}}"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"my_realm",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create_or_update_product",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{user_A_access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{   \n    \"name\":\"булочка\",\n    \"description\": \"ароматная кунжутная булочка\",\n    \"code\": \"bun\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{foodstuff_url}}/",
+					"host": [
+						"{{foodstuff_url}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "change_product_quantity 1st attempt",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let uuid = require('uuid');",
+							"let idempotency_key = uuid.v4();",
+							"pm.collectionVariables.set('idempotency_key', idempotency_key)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{user_A_access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{   \n    \"requestUuid\": \"{{idempotency_key}}\",\n    \"code\": \"bun\",\n    \"quantity\": 4\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{foodstuff_url}}/",
+					"host": [
+						"{{foodstuff_url}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "change_product_quantity 2nd attempt (duplicate)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{user_A_access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{   \n    \"requestUuid\": \"{{idempotency_key}}\",\n    \"code\": \"bun\",\n    \"quantity\": 4\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{foodstuff_url}}/",
+					"host": [
+						"{{foodstuff_url}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "master_username",
+			"value": "user"
+		},
+		{
+			"key": "password",
+			"value": "qwerty",
+			"type": "string"
+		},
+		{
+			"key": "masterAccessToken",
+			"value": ""
+		},
+		{
+			"key": "user_A_username",
+			"value": ""
+		},
+		{
+			"key": "user_A_field_value",
+			"value": ""
+		},
+		{
+			"key": "user_A_access_token",
+			"value": ""
+		},
+		{
+			"key": "idempotency_key",
+			"value": ""
+		}
+	]
+}
